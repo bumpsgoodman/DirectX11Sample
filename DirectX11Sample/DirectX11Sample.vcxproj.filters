@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Direct3D">
+      <UniqueIdentifier>{ec515584-ae17-4f2c-9f89-b0b3b0e442fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sample">
+      <UniqueIdentifier>{b1734098-38df-4178-9c04-9e301faf726c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{230d9f64-4856-4cd0-800f-2b9643433bfa}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Util\SafeDelete.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Assert.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sample\Main.cpp">
+      <Filter>Sample</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
