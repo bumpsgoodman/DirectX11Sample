@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <Windows.h>
 
+#include "../Direct3D/Direct3D.h"
 #include "../Util/Assert.h"
 
 wchar_t gAppName[] = L"DirectX11Sample";
@@ -32,6 +33,12 @@ int WINAPI wWinMain(
         return -1;
     }
 
+    Direct3D* d3d = new Direct3D;
+    if (!d3d->Initialize(hWnd, hInstance))
+    {
+        goto EXIT;
+    }
+
     while (true)
     {
         if (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -47,9 +54,12 @@ int WINAPI wWinMain(
         else
         {
             // game loop
+            d3d->Render();
         }
     }
 
+EXIT:
+    delete d3d;
 	return 0;
 }
 

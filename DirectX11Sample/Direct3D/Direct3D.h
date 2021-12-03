@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <d3d11_1.h>
+#include <DirectXColors.h>
 #include <Windows.h>
 
 #pragma comment(lib, "d3d11.lib")
@@ -13,8 +16,9 @@ public:
 	Direct3D& operator=(const Direct3D&) = delete;
 	~Direct3D();
 
-	bool Init(HWND hWnd, HINSTANCE hInstance);
+	bool Initialize(const HWND hWnd, const HINSTANCE hInstance);
 	void Cleanup();
+	void Render() const;
 
 private:
 	bool initDevice();
@@ -30,4 +34,7 @@ private:
 	ID3D11DeviceContext*	mImmediateContext = nullptr;
 	IDXGISwapChain*			mSwapChain = nullptr;
 	ID3D11RenderTargetView* mRenderTargetView = nullptr;
+
+	uint32_t				mWidth = 0;
+	uint32_t				mHeight = 0;
 };
