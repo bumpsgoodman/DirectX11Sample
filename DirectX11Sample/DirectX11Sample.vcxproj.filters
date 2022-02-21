@@ -10,6 +10,9 @@
     <Filter Include="Sample">
       <UniqueIdentifier>{b1734098-38df-4178-9c04-9e301faf726c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{44cdeb84-6f47-41b1-a5c1-75c8032c11e9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Util\SafeDelete.h">
@@ -21,6 +24,12 @@
     <ClInclude Include="Direct3D\Direct3D.h">
       <Filter>Direct3D</Filter>
     </ClInclude>
+    <ClInclude Include="Direct3D\SimpleVertex.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D\Float3.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sample\Main.cpp">
@@ -29,5 +38,13 @@
     <ClCompile Include="Direct3D\Direct3D.cpp">
       <Filter>Direct3D</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\SimpleTriangle_VS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimpleTriangle_PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
