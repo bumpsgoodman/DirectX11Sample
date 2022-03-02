@@ -24,12 +24,6 @@
     <ClInclude Include="Direct3D\Direct3D.h">
       <Filter>Direct3D</Filter>
     </ClInclude>
-    <ClInclude Include="Direct3D\SimpleVertex.h">
-      <Filter>Direct3D</Filter>
-    </ClInclude>
-    <ClInclude Include="Direct3D\Float3.h">
-      <Filter>Direct3D</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sample\Main.cpp">
@@ -46,5 +40,16 @@
     <FxCompile Include="Shaders\SimpleTriangle_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Shaders\Cube_VS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\Cube_PS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Cube.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

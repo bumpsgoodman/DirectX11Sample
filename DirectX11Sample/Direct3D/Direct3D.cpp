@@ -1,5 +1,4 @@
 #include "Direct3D.h"
-#include "SimpleVertex.h"
 #include "../Util/Assert.h"
 #include "../Util/SafeDelete.h"
 
@@ -30,10 +29,9 @@ bool Direct3D::Initialize(const HWND hWnd, const HINSTANCE hInstance)
 
 	// Demo
 	ID3DBlob* vsBlob = nullptr;
-	hr = CompileShaderFromFile(L"Shaders/SimpleTriangle_VS.hlsl", "main", "vs_5_0", &vsBlob);
+	hr = CompileShaderFromFile(L"Shaders/Cube_VS.hlsl", "main", "vs_5_0", &vsBlob);
 	if (FAILED(hr))
 	{
-		SAFE_RELEASE(vsBlob);
 		AssertW(false, L"Failed to compile shader from file");
 		return false;
 	}
@@ -41,13 +39,15 @@ bool Direct3D::Initialize(const HWND hWnd, const HINSTANCE hInstance)
 	hr = mDevice->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &mVertexShader);
 	if (FAILED(hr))
 	{
+		SAFE_RELEASE(vsBlob);
 		AssertW(false, L"Failed to create vertex shader");
 		return false;
 	}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 	const uint32_t numElements = ARRAYSIZE(layout);
 
@@ -62,10 +62,9 @@ bool Direct3D::Initialize(const HWND hWnd, const HINSTANCE hInstance)
 	mImmediateContext->IASetInputLayout(mVertexLayout);
 
 	ID3DBlob* psBlob = nullptr;
-	hr = CompileShaderFromFile(L"Shaders/SimpleTriangle_PS.hlsl", "main", "ps_5_0", &psBlob);
+	hr = CompileShaderFromFile(L"Shaders/Cube_PS.hlsl", "main", "ps_5_0", &psBlob);
 	if (FAILED(hr))
 	{
-		SAFE_RELEASE(vsBlob);
 		AssertW(false, L"Failed to compile shader from file");
 		return false;
 	}
@@ -80,31 +79,98 @@ bool Direct3D::Initialize(const HWND hWnd, const HINSTANCE hInstance)
 
 	SimpleVertex vertices[] =
 	{
-		{ 0.0f, 0.5f, 0.5f },
-		{ 0.5f, -0.5f, 0.5f },
-		{ -0.5f, -0.5f, 0.5f }
+		{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) },
+		{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) },
 	};
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(SimpleVertex) * 3;
+	bd.ByteWidth = sizeof(SimpleVertex) * 8;
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA initData = {};
 	initData.pSysMem = vertices;
 	hr = mDevice->CreateBuffer(&bd, &initData, &mVertexBuffer);
+	if (FAILED(hr))
+	{
+		AssertW(false, L"Failed to create vertex buffer");
+		return false;
+	}
 
 	UINT stride = sizeof(SimpleVertex);
 	UINT offset = 0;
 	mImmediateContext->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 
+	WORD indices[] =
+	{
+		3,1,0,
+		2,1,3,
+
+		0,5,4,
+		1,5,0,
+
+		3,4,7,
+		0,4,3,
+
+		1,6,5,
+		2,6,1,
+
+		2,7,6,
+		3,7,2,
+
+		6,4,5,
+		7,4,6,
+	};
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(WORD) * 36;        // 36 vertices needed for 12 triangles in a triangle list
+	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bd.CPUAccessFlags = 0;
+	initData.pSysMem = indices;
+	hr = mDevice->CreateBuffer(&bd, &initData, &mIndexBuffer);
+	if (FAILED(hr))
+	{
+		AssertW(false, L"Failed to create index buffer");
+		return false;
+	}
+
+	mImmediateContext->IASetIndexBuffer(mIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
 	mImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(ConstantBuffer);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	hr = mDevice->CreateBuffer(&bd, nullptr, &mConstantBuffer);
+	if (FAILED(hr))
+	{
+		AssertW(false, L"Failed to create constant buffer");
+		return false;
+	}
+
+	mWorld = XMMatrixIdentity();
+
+	XMVECTOR eye = XMVectorSet(0.0f, 2.0f, -5.0f, 0.0f);	// 눈 위치
+	XMVECTOR at = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);		// 목표지점
+	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);		// 정수리 바라보는 방향
+	mView = XMMatrixLookAtLH(eye, at, up);
+
+	// Initialize the projection matrix
+	mProjection = XMMatrixPerspectiveFovLH(XM_PIDIV2, mWidth / (FLOAT)mHeight, 0.01f, 100.0f);
 
 	return true;
 }
 
 void Direct3D::Cleanup()
 {
+	SAFE_RELEASE(mConstantBuffer);
+	SAFE_RELEASE(mIndexBuffer);
 	SAFE_RELEASE(mVertexBuffer);
 	SAFE_RELEASE(mVertexLayout);
 	SAFE_RELEASE(mVertexShader);
@@ -115,13 +181,33 @@ void Direct3D::Cleanup()
 	SAFE_RELEASE(mDevice);
 }
 
-void Direct3D::Render() const
+void Direct3D::Render()
 {
+	static float deltaTime = 0.0f;
+
+	static ULONGLONG timeStart = 0;
+	ULONGLONG timeCur = GetTickCount64();
+	if (timeStart == 0)
+	{
+		timeStart = timeCur;
+	}
+
+	deltaTime = (timeCur - timeStart) / 1000.0f;
+
+	mWorld = XMMatrixRotationY(deltaTime);
+
 	mImmediateContext->ClearRenderTargetView(mRenderTargetView, DirectX::Colors::MidnightBlue);
 
+	ConstantBuffer cb;
+	cb.mWorld = XMMatrixTranspose(mWorld);
+	cb.mView = XMMatrixTranspose(mView);
+	cb.mProjection = XMMatrixTranspose(mProjection);
+	mImmediateContext->UpdateSubresource(mConstantBuffer, 0, nullptr, &cb, 0, 0);
+
 	mImmediateContext->VSSetShader(mVertexShader, nullptr, 0);
+	mImmediateContext->VSSetConstantBuffers(0, 1, &mConstantBuffer);
 	mImmediateContext->PSSetShader(mPixelShader, nullptr, 0);
-	mImmediateContext->Draw(3, 0);
+	mImmediateContext->DrawIndexed(36, 0, 0);
 
 	mSwapChain->Present(0, 0);
 }
@@ -228,7 +314,7 @@ HRESULT CompileShaderFromFile(const WCHAR* szFileName, LPCSTR szEntryPoint, LPCS
 #endif
 
 	ID3DBlob* pErrorBlob = nullptr;
-	hr = D3DCompileFromFile(szFileName, nullptr, nullptr, szEntryPoint, szShaderModel,
+	hr = D3DCompileFromFile(szFileName, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, szEntryPoint, szShaderModel,
 		dwShaderFlags, 0, ppBlobOut, &pErrorBlob);
 	if (FAILED(hr))
 	{

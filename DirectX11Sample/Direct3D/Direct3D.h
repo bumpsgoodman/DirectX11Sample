@@ -5,10 +5,27 @@
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
 #include <DirectXColors.h>
+#include <DirectXMath.h>
 #include <Windows.h>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
+
+using namespace DirectX;
+
+struct SimpleVertex
+{
+	XMFLOAT3 Pos;
+	XMFLOAT4 Color;
+};
+
+struct ConstantBuffer
+{
+	XMMATRIX mWorld;
+	XMMATRIX mView;
+	XMMATRIX mProjection;
+};
 
 class Direct3D final
 {
@@ -21,8 +38,8 @@ public:
 
 	bool Initialize(const HWND hWnd, const HINSTANCE hInstance);
 	void Cleanup();
-	void Render() const;
-			
+	void Render();
+
 private:
 	bool initDevice();
 
@@ -41,6 +58,11 @@ private:
 	ID3D11InputLayout*		mVertexLayout = nullptr;
 	ID3D11PixelShader*		mPixelShader = nullptr;
 	ID3D11Buffer*			mVertexBuffer = nullptr;
+	ID3D11Buffer*			mIndexBuffer = nullptr;
+	ID3D11Buffer*			mConstantBuffer = nullptr;
+	XMMATRIX				mWorld = {};
+	XMMATRIX				mView = {};
+	XMMATRIX				mProjection = {};
 
 	uint32_t				mWidth = 0;
 	uint32_t				mHeight = 0;
